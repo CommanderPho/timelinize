@@ -2,7 +2,16 @@
 # owner; so please feel free to use it and help improve and maintain it if it is useful!
 
 OS_NAME=$(shell go env GOOS)
+# Prefer the machine CPU, not the Go binary's arch. An amd64 Go on Apple
+# Silicon would otherwise fail to link Homebrew's arm64 libvips.
+UNAME_M=$(shell uname -m)
+ifeq ($(UNAME_M),arm64)
+OS_ARCH=arm64
+else ifeq ($(UNAME_M),x86_64)
+OS_ARCH=amd64
+else
 OS_ARCH=$(shell go env GOARCH)
+endif
 
 ZIG_DEP=zig
 ZIG_DEP_WHICH=$(shell command -v $(ZIG_DEP))
@@ -52,7 +61,7 @@ bin: dep
 	# darwin amd64
 	#CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o $(BIN_ROOT)/$(BIN_NAME)_darwin_amd64
 	# darwin arm64
-	go build -o $(BIN_ROOT)/$(BIN_NAME)_darwin_arm64
+	CGO_ENABLED=1 GOARCH=$(OS_ARCH) go build -o $(BIN_ROOT)/$(BIN_NAME)_$(OS_NAME)_$(OS_ARCH)
 bin-cross:
 	# linux amd64
 	#CGO_ENABLED=1 GOOS=linux GOARCH=amd64 CC="zig cc -target x86_64-linux" CXX="zig c++ -target x86_64-linux" go build -o $(BIN_ROOT)/$(BIN_NAME)_linux_amd64

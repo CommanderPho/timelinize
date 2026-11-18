@@ -2,3 +2,6 @@ _gitignore/
 _storage/
 My Timeline
 .DS_Store
+.specstory
+.cursorindexingignore
+.bin/timelinize_darwin_arm64
